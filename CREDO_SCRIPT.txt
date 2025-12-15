@@ -1,0 +1,20 @@
+DECLARE @StartDate DATE = '2024-06-01';
+
+SELECT
+    SourceTableName,
+    YEAR(EntryDate)  AS [Year],
+    DATENAME(MONTH, EntryDate) AS [Month],
+    MONTH(EntryDate) AS MonthNumber,
+    SUM(TotalDataTransfered) AS TotalDataTransferred
+FROM [DBADB].[dbo].[TBL_RETENTION_LOGS]
+WHERE EntryDate >= @StartDate
+  AND EntryDate <  GETDATE()
+GROUP BY
+    SourceTableName,
+    YEAR(EntryDate),
+    MONTH(EntryDate),
+    DATENAME(MONTH, EntryDate)
+ORDER BY
+    SourceTableName,
+    [Year],
+    MonthNumber;
