@@ -186,3 +186,14 @@ GROUP BY YEAR(CaptureDate), MONTH(CaptureDate), DATENAME(MONTH, CaptureDate)
 ORDER BY YEAR(CaptureDate), MONTH(CaptureDate);
 
 
+SELECT
+    YEAR(CaptureDate) AS [Year],
+    DATENAME(MONTH, CaptureDate) AS [Month],
+    ROUND(AVG([Value]), 2) AS AvgTransactionsPerSec
+FROM [DBADB].[dbo].[PerfMonData]
+WHERE counter = 'SQLServer:Databases: Transactions/sec:MARSPROD'
+  AND CaptureDate >= DATEADD(MONTH, -6, GETDATE())
+GROUP BY YEAR(CaptureDate), MONTH(CaptureDate), DATENAME(MONTH, CaptureDate)
+ORDER BY YEAR(CaptureDate), MONTH(CaptureDate);
+
+
