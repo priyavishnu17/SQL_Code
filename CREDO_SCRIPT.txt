@@ -18,3 +18,61 @@ ORDER BY
     SourceTableName,
     [Year],
     MonthNumber;
+
+
+WITH MonthlySize AS
+(
+    SELECT
+        Instance_Name,
+        Database_Names,
+        YEAR([Dates])  AS [Year],
+        MONTH([Dates]) AS MonthNumber,
+        DATENAME(MONTH, [Dates]) AS [Month],
+        MAX([Size MB]) AS SizeMB
+    FROM [DBADB].[dbo].[DB_Meta]
+    WHERE [Dates] >= '2024-06-01'
+      AND [Dates] <  GETDATE()
+    GROUP BY
+        Instance_Name,
+        Database_Names,
+        YEAR([Dates]),
+        MONTH([Dates]),
+        DATENAME(MONTH, [Dates])
+)
+SELECT
+    Instance_Name,
+    Database_Names,
+    [Year],
+    [Month],
+    MonthNumber,
+    SizeMB AS CurrentSize_MB,
+    LAG(SizeMB) OVER (
+        PARTITION BY Instance_Name, Database_Names
+        ORDER BY [Year], MonthNumber
+    ) AS PreviousMonthSize_MB,
+    (SizeMB -
+     LAG(SizeMB) OVER (
+        PARTITION BY Instance_Name, Database_Names
+        ORDER BY [Year], MonthNumber
+     )) AS Growth_MB,
+    ROUND(
+        (
+            (SizeMB -
+             LAG(SizeMB) OVER (
+                PARTITION BY Instance_Name, Database_Names
+                ORDER BY [Year], MonthNumber
+             )) * 100.0
+        ) /
+        NULLIF(
+            LAG(SizeMB) OVER (
+                PARTITION BY Instance_Name, Database_Names
+                ORDER BY [Year], MonthNumber
+            ), 0
+        ), 2
+    ) AS Growth_Percentage
+FROM MonthlySize
+ORDER BY
+    Instance_Name,
+    Database_Names,
+    [Year],
+    MonthNumber;
