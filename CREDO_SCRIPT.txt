@@ -173,3 +173,16 @@ WHERE CaptureDate > '2025-06-01'
 GROUP BY YEAR(CaptureDate), MONTH(CaptureDate), DATENAME(MONTH, CaptureDate)
 ORDER BY YEAR(CaptureDate), MONTH(CaptureDate);
 
+
+SELECT
+    YEAR(CaptureDate) AS [Year],
+    DATENAME(MONTH, CaptureDate) AS [Month],
+    COUNT(*) AS TotalSamples,
+    AVG([Value]) AS AvgTransactionsPerSec
+FROM [DBADB].[dbo].[PerfMonData]
+WHERE CaptureDate > '2025-06-01'
+  AND RTRIM(LTRIM(Counter)) = 'SQLServer:Databases: Transactions/sec:MARSPROD'
+GROUP BY YEAR(CaptureDate), MONTH(CaptureDate), DATENAME(MONTH, CaptureDate)
+ORDER BY YEAR(CaptureDate), MONTH(CaptureDate);
+
+
